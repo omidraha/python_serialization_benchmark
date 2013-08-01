@@ -3,7 +3,7 @@ Python Serialization Benchmark
 
 This is a simple python serialization benchmark script.
 
-To do benchmark yourself, run `python run.py`
+To do benchmark yourself, run ``python run.py``
 
 Here is a sample output of it::
 
