@@ -5,9 +5,9 @@ This is a simple python serialization benchmark script.
 
 To do benchmark yourself, run `python run.py`
 
-Here is a sample output of it:
+Here is a sample output of it::
 
-Benchmark result:
+    Benchmark result:
 
     Tech           Time(sorted)        Size
     marshal        0.0370650291443     267
@@ -24,7 +24,6 @@ Benchmark result:
     pickle         1.11316609383       338
     yaml           18.1256849766       318
     
-
     Tech           Size(sorted)        Time
     msgpack        204                 0.118673801422
     bson           242                 0.0895049571991
