@@ -4,37 +4,49 @@
 """
 This is a simple python serialization benchmark script, sample output:
 
-Benchmark result:
+    Benchmark result:
 
-    Tech           Time(sorted)        Size
-    marshal        0.0370650291443     267
-    ujson          0.0481259822845     362
-    yajl           0.0740070343018     352
-    cjosn          0.0746648311615     371
-    tnetstring     0.0764350891113     261
-    bson           0.0895049571991     242
-    msgpack        0.118673801422      204
-    json           0.156835079193      375
-    dj_simplejson  0.202381849289      375
-    simple_json    0.204254150391      375
-    c_pickle       0.210531949997      340
-    pickle         1.11316609383       338
-    yaml           18.1256849766       318
+    Serializer               Time(sorted)        Size
+    marshal                  0.0351901054382     267
+    ujson                    0.0465569496155     362
+    yajl                     0.0733790397644     352
+    cjosn                    0.0747971534729     371
+    tnetstring               0.0766470432281     261
+    bson                     0.0918030738831     242
+    cpickle version 2        0.0973179340363     263
+    cpickle version 1        0.0986309051514     264
+    msgpack                  0.122428178787      204
+    json                     0.155917167664      375
+    django simplejson        0.199804782867      375
+    simple json              0.200035095215      375
+    cpickle version 0        0.215695858002      340
+    jsonpickle               0.993372917175      375
+    pickle version 0         1.11252117157       338
+    pickle version 1         1.12831997871       264
+    pickle version 2         1.13715100288       263
+    yaml `libYAML(True)`     18.1359300613       318
 
-    Tech           Size(sorted)        Time
-    msgpack        204                 0.118673801422
-    bson           242                 0.0895049571991
-    tnetstring     261                 0.0764350891113
-    marshal        267                 0.0370650291443
-    yaml           318                 18.1256849766
-    pickle         338                 1.11316609383
-    c_pickle       340                 0.210531949997
-    yajl           352                 0.0740070343018
-    ujson          362                 0.0481259822845
-    cjosn          371                 0.0746648311615
-    dj_simplejson  375                 0.202381849289
-    json           375                 0.156835079193
-    simple_json    375                 0.204254150391
+    Serializer               Size(sorted)        Time
+    msgpack                  204                 0.122428178787
+    bson                     242                 0.0918030738831
+    tnetstring               261                 0.0766470432281
+    pickle version 2         263                 1.13715100288
+    cpickle version 2        263                 0.0973179340363
+    cpickle version 1        264                 0.0986309051514
+    pickle version 1         264                 1.12831997871
+    marshal                  267                 0.0351901054382
+    yaml `libYAML(True)`     318                 18.1359300613
+    pickle version 0         338                 1.11252117157
+    cpickle version 0        340                 0.215695858002
+    yajl                     352                 0.0733790397644
+    ujson                    362                 0.0465569496155
+    cjosn                    371                 0.0747971534729
+    json                     375                 0.155917167664
+    simple json              375                 0.200035095215
+    django simplejson        375                 0.199804782867
+    jsonpickle               375                 0.993372917175
+
+
 """
 
 from time import time
@@ -49,6 +61,7 @@ import cjson
 import ujson
 import yaml
 import simplejson
+import jsonpickle
 import tnetstring
 import yajl
 from django.utils import simplejson as dj_simplejson
@@ -69,15 +82,20 @@ dumpers = {'marshal': lambda data: marshal.dumps(data, 2),
            'bson': lambda data: bson.BSON.encode(data),
            'msgpack': lambda data: msgpack.packb(data),
            'json': lambda data: json.dumps(data),
-           'pickle': lambda data: pickle.dumps(data),
-           'c_pickle': lambda data: c_pickle.dumps(data),
+           'pickle version 0': lambda data: pickle.dumps(data, protocol=0),
+           'pickle version 1': lambda data: pickle.dumps(data, protocol=1),
+           'pickle version 2': lambda data: pickle.dumps(data, protocol=2),
+           'cpickle version 0': lambda data: c_pickle.dumps(data, protocol=0),
+           'cpickle version 1': lambda data: c_pickle.dumps(data, protocol=1),
+           'cpickle version 2': lambda data: c_pickle.dumps(data, protocol=2),
+           'jsonpickle': lambda data: jsonpickle.encode(data),
            'cjosn': lambda data: cjson.encode(data),
            'ujson': lambda data: ujson.dumps(data),
-           'simple_json': lambda data: simplejson.dumps(data),
-           'dj_simplejson': lambda data: dj_simplejson.dumps(data),
+           'simple json': lambda data: simplejson.dumps(data),
+           'django simplejson': lambda data: dj_simplejson.dumps(data),
            'yajl': lambda data: yajl.dumps(data),
            'tnetstring': lambda data: tnetstring.dumps(data, "utf8"),
-           'yaml': lambda data: yaml.dump(data)
+           'yaml `libYAML({})`'.format(yaml.__with_libyaml__): lambda data: yaml.dump(data)
 }
 
 s = 0
@@ -93,10 +111,12 @@ for dumper in dumpers.iterkeys():
 
 print ' '* 60
 print 'Benchmark result:'
-print '\n{:<15}{:<20}{}'.format('Tech', 'Time(sorted)', 'Size')
-for dumper in sorted(result.keys(),key=lambda x:result[x][0]):
-    print "{:<15}{:<20}{}".format(dumper, result[dumper][0], result[dumper][1])
+print '\n{:<25}{:<20}{}'.format('Serializer', 'Time(sorted)', 'Size')
 
-print '\n{:<15}{:<20}{}'.format('Tech', 'Size(sorted)', 'Time')
+for dumper in sorted(result.keys(),key=lambda x:result[x][0]):
+    print "{:<25}{:<20}{}".format(dumper, result[dumper][0], result[dumper][1])
+
+print '\n{:<25}{:<20}{}'.format('Serializer', 'Size(sorted)', 'Time')
 for dumper in sorted(result.keys(),key=lambda x:result[x][1]):
-    print "{:<15}{:<20}{}".format(dumper, result[dumper][1], result[dumper][0])
+    print "{:<25}{:<20}{}".format(dumper, result[dumper][1], result[dumper][0])
+print
