@@ -9,7 +9,6 @@ Here is a sample output of it::
 
     Benchmark result:
 
-
     Serializer               Time(sorted)        Size
     marshal                  0.0351901054382     267
     ujson                    0.0465569496155     362
